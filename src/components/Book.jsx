@@ -8,7 +8,7 @@
  * - Handles creating new pages.
  */
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { getAllPages, savePage } from '../firebase/diaryService';
+import { getAllPages } from '../firebase/diaryService';
 import PageLeft from './PageLeft';
 import PageRight from './PageRight';
 import PageFlipBtn from './PageFlipBtn';
@@ -82,32 +82,7 @@ export default function Book() {
     }, 600); // matches animation duration
   }, [currentIndex, pages.length]);
 
-  // ── Add a new blank page ──────────────────────────────────────────
-  const handleAddPage = useCallback(async () => {
-    const newPage = blankPage();
-    // Pre-create the Firestore doc so it gets the createdAt timestamp
-    try {
-      await savePage(newPage.id, { date: newPage.date, content: newPage.content });
-    } catch (err) {
-      console.error('Could not create new page:', err);
-    }
-    setPages((prev) => [...prev, newPage]);
-    // Navigate to the new page with animation
-    isAnimating.current = true;
-    setFlipClass('page-flip-next');
-    setTimeout(() => {
-      setCurrentIndex((prev) => prev + 1);
-      setFlipClass('');
-      isAnimating.current = false;
-    }, 600);
-  }, []);
 
-  // ── Sync page updates from PageRight back into local state ────────
-  const handlePageUpdate = useCallback((id, updates) => {
-    setPages((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, ...updates } : p))
-    );
-  }, []);
 
   // ── Keyboard navigation ───────────────────────────────────────────
   useEffect(() => {
@@ -125,6 +100,7 @@ export default function Book() {
   const previousPage = pages[currentIndex - 1] ?? null;
   const isFirst      = currentIndex === 0;
   const isLast       = currentIndex === pages.length - 1;
+  // Note: isLast is still used for disabling the "next" button
 
   // ── Render ────────────────────────────────────────────────────────
   return (
@@ -207,9 +183,6 @@ export default function Book() {
                 <PageRight
                   page={currentPage}
                   pageNum={currentIndex * 2 + 1}
-                  isLast={isLast}
-                  onAddPage={handleAddPage}
-                  onPageUpdate={handlePageUpdate}
                 />
               </div>
             </>
