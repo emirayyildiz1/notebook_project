@@ -1,0 +1,258 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── CSS custom properties ─────────────────────────────────────────── */
+:root {
+  --parchment-bg:    #faf3e0;
+  --parchment-warm:  #f5e8c8;
+  --parchment-aged:  #eedcae;
+  --line-color:      #dfd0ae;
+  --ink:             #3d2b1f;
+  --ink-light:       #6b5243;
+  --spine-color:     #8b5e3c;
+  --leather-dark:    #4a2318;
+  --leather-mid:     #6b3a2a;
+  --leather-light:   #9c5f3e;
+  --line-height-px:  28px;
+}
+
+/* ─── Base reset & body ──────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Lora', Georgia, serif;
+  background-color: #2c1a0e;
+  /* Subtle leather/wood texture using pure CSS */
+  background-image:
+    radial-gradient(ellipse at 20% 50%, rgba(139, 90, 43, 0.3) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(100, 50, 20, 0.4) 0%, transparent 50%),
+    radial-gradient(ellipse at 60% 80%, rgba(160, 100, 40, 0.2) 0%, transparent 55%),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.03) 2px,
+      rgba(0,0,0,0.03) 4px
+    );
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* ─── Scrollbar styling ──────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--parchment-aged);
+  border-radius: 2px;
+}
+
+/* ─── Page-lined background ─────────────────────────────────────────── */
+.page-lines {
+  background-image: repeating-linear-gradient(
+    transparent,
+    transparent calc(var(--line-height-px) - 1px),
+    var(--line-color) calc(var(--line-height-px) - 1px),
+    var(--line-color) var(--line-height-px)
+  );
+  background-size: 100% var(--line-height-px);
+  background-position: 0 42px; /* offset so first line aligns under date */
+}
+
+/* ─── Textarea reset for diary feel ─────────────────────────────────── */
+.diary-textarea {
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: none;
+  width: 100%;
+  line-height: var(--line-height-px);
+  font-size: 1rem;
+  font-family: 'Lora', Georgia, serif;
+  color: var(--ink);
+  caret-color: var(--ink);
+  padding: 0;
+  margin: 0;
+  overflow-y: auto;
+  word-wrap: break-word;
+}
+
+.diary-textarea::placeholder {
+  color: rgba(107, 82, 67, 0.35);
+  font-style: italic;
+}
+
+.diary-textarea:focus {
+  box-shadow: none;
+  outline: none;
+  border: none;
+}
+
+/* ─── Date input on page ────────────────────────────────────────────── */
+.date-input {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--parchment-aged);
+  outline: none;
+  font-family: 'Caveat', cursive;
+  font-size: 1.1rem;
+  color: var(--ink-light);
+  padding: 2px 4px;
+  text-align: right;
+  cursor: pointer;
+  transition: border-color 0.2s;
+  min-width: 130px;
+}
+
+.date-input:focus {
+  border-bottom-color: var(--spine-color);
+}
+
+.date-input::-webkit-calendar-picker-indicator {
+  opacity: 0.4;
+  cursor: pointer;
+  filter: invert(25%) sepia(20%) saturate(800%) hue-rotate(10deg);
+}
+
+/* ─── Book shadow & 3D perspective ──────────────────────────────────── */
+.book-container {
+  perspective: 2000px;
+}
+
+/* ─── Page flip animation ───────────────────────────────────────────── */
+@keyframes flipToNext {
+  0%   { transform: rotateY(0deg);    transform-origin: left center; }
+  50%  { transform: rotateY(-90deg);  transform-origin: left center; z-index: 20; }
+  100% { transform: rotateY(0deg);    transform-origin: left center; }
+}
+
+@keyframes flipToPrev {
+  0%   { transform: rotateY(0deg);    transform-origin: right center; }
+  50%  { transform: rotateY(90deg);   transform-origin: right center; z-index: 20; }
+  100% { transform: rotateY(0deg);    transform-origin: right center; }
+}
+
+@keyframes pageShadowIn {
+  0%   { opacity: 0; }
+  50%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.page-flip-next {
+  animation: flipToNext 0.6s cubic-bezier(0.645, 0.045, 0.355, 1.000) forwards;
+  backface-visibility: hidden;
+}
+
+.page-flip-prev {
+  animation: flipToPrev 0.6s cubic-bezier(0.645, 0.045, 0.355, 1.000) forwards;
+  backface-visibility: hidden;
+}
+
+/* ─── Spine gradient (center crease) ───────────────────────────────── */
+.book-spine {
+  background: linear-gradient(
+    to right,
+    rgba(0,0,0,0.25) 0%,
+    rgba(0,0,0,0.08) 15%,
+    rgba(255,255,255,0.05) 48%,
+    rgba(255,255,255,0.05) 52%,
+    rgba(0,0,0,0.08) 85%,
+    rgba(0,0,0,0.2) 100%
+  );
+  pointer-events: none;
+}
+
+/* ─── Page curl shadow on right page ───────────────────────────────── */
+.page-right-shadow::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    rgba(0,0,0,0.12) 0%,
+    transparent 8%
+  );
+  pointer-events: none;
+}
+
+/* ─── Page number & ornament ────────────────────────────────────────── */
+.page-number {
+  font-family: 'Caveat', cursive;
+  color: var(--ink-light);
+  opacity: 0.5;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+}
+
+/* ─── Saving indicator ──────────────────────────────────────────────── */
+@keyframes inkDrop {
+  0%   { opacity: 1; transform: scale(1); }
+  50%  { opacity: 0.5; transform: scale(0.8); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.saving-dot {
+  animation: inkDrop 1.2s ease-in-out infinite;
+}
+
+/* ─── Navigation buttons ────────────────────────────────────────────── */
+.nav-btn {
+  transition: all 0.25s ease;
+}
+
+.nav-btn:hover {
+  transform: scale(1.08);
+}
+
+.nav-btn:active {
+  transform: scale(0.96);
+}
+
+/* ─── Left page decorative top ─────────────────────────────────────── */
+.decorative-divider {
+  border: none;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--parchment-aged), transparent);
+  margin: 8px 0;
+}
+
+/* ─── Loading ink spinner ───────────────────────────────────────────── */
+@keyframes inkSpread {
+  0%   { transform: scale(0); opacity: 1; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+
+.ink-ring {
+  animation: inkSpread 1.4s ease-out infinite;
+}
+
+.ink-ring:nth-child(2) {
+  animation-delay: 0.5s;
+}
+
+/* ─── Smooth transitions for page content ──────────────────────────── */
+.page-content-enter {
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+.page-content-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
